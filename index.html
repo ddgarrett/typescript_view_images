@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"> 
+  <title>Media Browser</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar" id="sidebar">
+        <div id="tree-container" class="tree-container"></div>
+        <div class="sidebar-buttons">
+            <button id="btn-new">New</button>
+            <button id="btn-open">Open</button>
+            <button id="btn-save">Save</button>
+        </div>
+    </div>
+
+    <div class="resizer" id="drag-bar"></div>
+
+    <div class="main-content">
+      <div id="grid-container" class="grid-container">
+        </div>
+      <div class="bottom-bar">
+        <div id="page-counter">Page 0 of 0 pages</div>
+        <div class="page-size-selector">
+          <label for="page-size">Images per page:</label>
+          <select id="page-size">
+            <option value="4">4 (2x2)</option>
+            <option value="9" selected>9 (3x3)</option>
+            <option value="16">16 (4x4)</option>
+            <option value="25">25 (5x5)</option>
+          </select>
+        </div>
+        <div class="pagination-buttons">
+          <button id="btn-first">First</button>
+          <button id="btn-prev">Previous</button>
+          <button id="btn-next">Next</button>
+          <button id="btn-last">Last</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>
