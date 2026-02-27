@@ -1,3 +1,5 @@
+/// <reference path="./renderer-globals.d.ts" />
+
 const btnNew = document.getElementById('btn-new') as HTMLButtonElement;
 const treeContainer = document.getElementById('tree-container') as HTMLDivElement;
 const gridContainer = document.getElementById('grid-container') as HTMLDivElement;
