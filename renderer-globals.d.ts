@@ -1,3 +1,8 @@
+/**
+ * Global type declarations for the renderer: MediaNode tree types and Window.electronAPI.
+ * Ensures renderer.ts sees the same types without importing from main-process modules.
+ */
+
 type MediaKind = 'folder' | 'image' | 'video';
 
 interface BaseNode {

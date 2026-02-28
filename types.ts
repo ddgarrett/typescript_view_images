@@ -1,3 +1,8 @@
+/**
+ * Shared types for the main process: folder tree (FolderNode, FileNode, MediaNode),
+ * optional EXIF fields on files, and the ElectronAPI interface used by preload.
+ */
+
 export type MediaKind = 'folder' | 'image' | 'video';
 
 export interface BaseNode {

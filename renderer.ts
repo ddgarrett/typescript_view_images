@@ -1,10 +1,19 @@
 /// <reference path="./renderer-globals.d.ts" />
 
+/**
+ * Renderer process for the main app window: folder tree, media grid, selection, pagination,
+ * and sidebar resizer. Talks to main via window.electronAPI (see preload).
+ */
+
+// ─── DOM references ───────────────────────────────────────────────────────
+
 const btnNew = document.getElementById('btn-new') as HTMLButtonElement;
 const treeContainer = document.getElementById('tree-container') as HTMLDivElement;
 const gridContainer = document.getElementById('grid-container') as HTMLDivElement;
 const pageCounter = document.getElementById('page-counter') as HTMLDivElement;
 const pageSizeSelect = document.getElementById('page-size') as HTMLSelectElement | null;
+
+// ─── State ─────────────────────────────────────────────────────────────────
 
 let selectedMedia: MediaNode[] = [];
 let currentPage = 1;
@@ -15,6 +24,8 @@ let selectedNodes: Set<MediaNode> = new Set();
 let flatNodeList: Array<{ node: MediaNode; label: HTMLSpanElement }> = [];
 let lastSelectedIndex: number | null = null;
 
+// ─── Utilities ─────────────────────────────────────────────────────────────
+
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -23,6 +34,8 @@ function formatBytes(bytes: number, decimals = 2): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
+
+// ─── Tree & media helpers ───────────────────────────────────────────────────
 
 function extractMedia(node: MediaNode): MediaNode[] {
   const media: MediaNode[] = [];
@@ -72,6 +85,8 @@ function buildTree(node: FolderNode, parentElement: HTMLElement): void {
     }
   });
 }
+
+// ─── Selection & gallery ───────────────────────────────────────────────────
 
 function refreshMediaGallery(): void {
   let allMedia: MediaNode[] = [];
@@ -160,6 +175,8 @@ const handleSelection = (e: MouseEvent, node: MediaNode, label: HTMLSpanElement)
   refreshMediaGallery();
 };
 
+// ─── Grid & pagination ──────────────────────────────────────────────────────
+
 function updateGridLayout(): void {
   const gridSize = Math.sqrt(itemsPerPage) || 1;
   gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
@@ -213,6 +230,8 @@ function updateGrid(): void {
   });
 }
 
+// ─── Load tree data ─────────────────────────────────────────────────────────
+
 function loadTreeData(data: FolderNode): void {
   currentTreeData = data;
   treeContainer.innerHTML = '';
@@ -234,6 +253,8 @@ function loadTreeData(data: FolderNode): void {
   updateGridLayout();
   updateGrid();
 }
+
+// ─── Event binding ─────────────────────────────────────────────────────────
 
 btnNew.addEventListener('click', async () => {
   const data = await window.electronAPI.openFolder();
@@ -291,6 +312,8 @@ pageSizeSelect?.addEventListener('change', () => {
     updateGrid();
   }
 });
+
+// ─── Sidebar resizer ────────────────────────────────────────────────────────
 
 const resizer = document.getElementById('drag-bar') as HTMLDivElement;
 const sidebar = document.getElementById('sidebar') as HTMLDivElement;

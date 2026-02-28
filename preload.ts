@@ -1,3 +1,8 @@
+/**
+ * Preload script for the main app window. Exposes a safe API (electronAPI) to the renderer
+ * via contextBridge; all main-process calls go through IPC (openFolder, saveFile, openFile, openMediaViewer).
+ */
+
 import { contextBridge, ipcRenderer } from 'electron';
 import type { ElectronAPI, FolderNode } from './types';
 
