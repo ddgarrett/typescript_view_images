@@ -14,8 +14,12 @@
   "license": "Apache-2.0",
   "type": "commonjs",
   "devDependencies": {
-    "electron": "^40.6.1",
     "@types/node": "^22.9.3",
+    "electron": "^40.6.1",
     "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "exifr": "^7.1.3",
+    "exiftool-vendored": "^35.11.0"
   }
 }

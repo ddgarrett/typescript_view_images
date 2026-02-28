@@ -188,6 +188,10 @@ function updateGrid(): void {
     const div = document.createElement('div');
     div.className = 'media-item';
 
+    div.addEventListener('dblclick', () => {
+      void window.electronAPI.openMediaViewer(fileNode.path, fileNode.type);
+    });
+
     if (fileNode.type === 'image') {
       const img = document.createElement('img');
       img.src = `file://${fileNode.path}`;

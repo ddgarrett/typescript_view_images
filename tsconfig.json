@@ -12,5 +12,5 @@
     "resolveJsonModule": true,
     "noEmitOnError": true
   },
-  "include": ["main.ts", "preload.ts", "types.ts"]
+  "include": ["main.ts", "preload.ts", "media-viewer-preload.ts", "types.ts"]
 }
