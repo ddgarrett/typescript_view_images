@@ -1,4 +1,4 @@
-# gemini_view_images
+# View Images
 
 View and review images similar to `process_images` repo but implemented as an Electron app using **TypeScript** instead of Tkinter and Python. The current `process_images` app wouldn't run on a Macbook Air.
 
