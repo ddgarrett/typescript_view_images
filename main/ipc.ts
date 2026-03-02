@@ -7,6 +7,7 @@ import { ipcMain, dialog } from 'electron';
 import * as fs from 'fs';
 import type { FolderNode } from '../types.js';
 import { scanDirectory } from './folderTree.js';
+import { loadCsvToTree } from './csvLoader.js';
 import { createMediaViewerWindow, mediaViewerArgs } from './windows.js';
 
 export function registerIpcHandlers(): void {
@@ -41,6 +42,26 @@ export function registerIpcHandlers(): void {
       return JSON.parse(rawData) as FolderNode;
     }
     return null;
+  });
+
+  ipcMain.handle('dialog:openCsv', async (): Promise<FolderNode | null> => {
+    const { canceled: csvCanceled, filePaths: csvPaths } = await dialog.showOpenDialog({
+      title: 'Import from CSV',
+      properties: ['openFile'],
+      filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+    });
+    if (csvCanceled || csvPaths.length === 0) return null;
+    const { canceled: dirCanceled, filePaths: dirPaths } = await dialog.showOpenDialog({
+      title: 'Select collection root folder (where images live)',
+      properties: ['openDirectory']
+    });
+    if (dirCanceled || dirPaths.length === 0) return null;
+    try {
+      return loadCsvToTree(csvPaths[0], dirPaths[0]);
+    } catch (err) {
+      console.error('CSV load error:', err);
+      return null;
+    }
   });
 
   ipcMain.handle(

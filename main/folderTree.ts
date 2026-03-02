@@ -50,7 +50,9 @@ async function createFileNode(filePath: string, stat: fs.Stats): Promise<FileNod
     name: path.basename(filePath),
     path: filePath,
     type: isVideo(ext) ? 'video' : 'image',
-    size: stat.size
+    size: stat.size,
+    status: 'tbd',
+    reviewLevel: 0
   };
 
   const meta = isVideo(ext)

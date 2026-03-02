@@ -13,6 +13,7 @@
             <button id="btn-new">New</button>
             <button id="btn-open">Open</button>
             <button id="btn-save">Save</button>
+            <button id="btn-import-csv">Import from CSV</button>
         </div>
     </div>
 
@@ -22,10 +23,21 @@
       <div id="grid-container" class="grid-container">
         </div>
       <div class="bottom-bar">
+        <div class="show-filter-selector">
+          <label for="show-filter">Show:</label>
+          <select id="show-filter">
+            <option value="all">All</option>
+            <option value="tbd">TBD</option>
+            <option value="possible_dup">Possible Duplicate</option>
+            <option value="possible_good_plus">Possible Good or Best</option>
+            <option value="possible_best">Possible Best</option>
+          </select>
+        </div>
         <div id="page-counter">Page 0 of 0 pages</div>
         <div class="page-size-selector">
           <label for="page-size">Images per page:</label>
           <select id="page-size">
+            <option value="1">1</option>
             <option value="4">4 (2x2)</option>
             <option value="9" selected>9 (3x3)</option>
             <option value="16">16 (4x4)</option>

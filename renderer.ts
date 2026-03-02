@@ -12,12 +12,17 @@ const treeContainer = document.getElementById('tree-container') as HTMLDivElemen
 const gridContainer = document.getElementById('grid-container') as HTMLDivElement;
 const pageCounter = document.getElementById('page-counter') as HTMLDivElement;
 const pageSizeSelect = document.getElementById('page-size') as HTMLSelectElement | null;
+const showFilterSelect = document.getElementById('show-filter') as HTMLSelectElement | null;
 
 // ─── State ─────────────────────────────────────────────────────────────────
 
 let selectedMedia: MediaNode[] = [];
 let currentPage = 1;
 let itemsPerPage = 9;
+
+/** Current Show filter: which media to display in the gallery. */
+type ShowFilter = 'all' | 'tbd' | 'possible_dup' | 'possible_good_plus' | 'possible_best';
+let showFilter: ShowFilter = 'all';
 
 let currentTreeData: FolderNode | null = null;
 let selectedNodes: Set<MediaNode> = new Set();
@@ -88,19 +93,46 @@ function buildTree(node: FolderNode, parentElement: HTMLElement): void {
 
 // ─── Selection & gallery ───────────────────────────────────────────────────
 
+/** Apply Show filter to a list of media nodes (file nodes only). */
+function applyShowFilter(media: MediaNode[]): MediaNode[] {
+  const files = media.filter((n): n is FileNode => n.type !== 'folder');
+  if (showFilter === 'all') return files;
+  return files.filter(node => {
+    const status = node.status ?? 'tbd';
+    const level = node.reviewLevel ?? 0;
+    switch (showFilter) {
+      case 'tbd':
+        return status === 'tbd';
+      case 'possible_dup':
+        return (level < 3 && status === 'tbd') || status === 'dup';
+      case 'possible_good_plus':
+        return level > 3 || status === 'tbd';
+      case 'possible_best':
+        return level > 4 || status === 'tbd';
+      default:
+        return true;
+    }
+  });
+}
+
 function refreshMediaGallery(): void {
   let allMedia: MediaNode[] = [];
 
-  selectedNodes.forEach(node => {
-    allMedia = allMedia.concat(extractMedia(node));
-  });
+  if (selectedNodes.size > 0) {
+    selectedNodes.forEach(node => {
+      allMedia = allMedia.concat(extractMedia(node));
+    });
+  } else if (currentTreeData) {
+    allMedia = extractMedia(currentTreeData);
+  }
 
   const unique = new Map<string, MediaNode>();
   allMedia.forEach(item => {
     unique.set(item.path, item);
   });
 
-  selectedMedia = Array.from(unique.values());
+  const unfiltered = Array.from(unique.values());
+  selectedMedia = applyShowFilter(unfiltered);
 
   currentPage = 1;
   updateGrid();
@@ -209,6 +241,11 @@ function updateGrid(): void {
       void window.electronAPI.openMediaViewer(fileNode.path, fileNode.type);
     });
 
+    div.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showStatusContextMenu(e, fileNode);
+    });
+
     if (fileNode.type === 'image') {
       const img = document.createElement('img');
       img.src = `file://${fileNode.path}`;
@@ -230,6 +267,42 @@ function updateGrid(): void {
   });
 }
 
+const STATUS_MENU_ITEMS: { label: string; status: FileNode['status']; reviewLevel: 0 | 1 | 2 | 3 | 4 | 5 }[] = [
+  { label: 'Reject', status: 'reject', reviewLevel: 0 },
+  { label: 'Poor Quality', status: 'bad', reviewLevel: 1 },
+  { label: 'Duplicate', status: 'dup', reviewLevel: 2 },
+  { label: 'Just Okay', status: 'ok', reviewLevel: 3 },
+  { label: 'Good', status: 'good', reviewLevel: 4 },
+  { label: 'Best', status: 'best', reviewLevel: 5 },
+  { label: 'TBD', status: 'tbd', reviewLevel: 0 }
+];
+
+function showStatusContextMenu(e: MouseEvent, fileNode: FileNode): void {
+  const popup = document.createElement('div');
+  popup.className = 'context-menu';
+  popup.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;background:#2d2d2d;border:1px solid #444;border-radius:4px;padding:4px;z-index:1000;min-width:160px;`;
+  STATUS_MENU_ITEMS.forEach(({ label, status, reviewLevel }) => {
+    const item = document.createElement('div');
+    item.textContent = label;
+    item.style.cssText = 'padding:6px 12px;cursor:pointer;';
+    item.addEventListener('click', () => {
+      fileNode.status = status;
+      fileNode.reviewLevel = reviewLevel;
+      document.body.removeChild(popup);
+      refreshMediaGallery();
+    });
+    item.addEventListener('mouseenter', () => { item.style.background = '#404040'; });
+    item.addEventListener('mouseleave', () => { item.style.background = ''; });
+    popup.appendChild(item);
+  });
+  document.body.appendChild(popup);
+  const close = () => {
+    if (popup.parentNode) document.body.removeChild(popup);
+    document.removeEventListener('click', close);
+  };
+  setTimeout(() => document.addEventListener('click', close), 0);
+}
+
 // ─── Load tree data ─────────────────────────────────────────────────────────
 
 function loadTreeData(data: FolderNode): void {
@@ -248,7 +321,7 @@ function loadTreeData(data: FolderNode): void {
 
   buildTree(data, treeContainer);
 
-  selectedMedia = extractMedia(data);
+  selectedMedia = applyShowFilter(extractMedia(data));
   currentPage = 1;
   updateGridLayout();
   updateGrid();
@@ -274,6 +347,19 @@ document.getElementById('btn-save')?.addEventListener('click', async () => {
 document.getElementById('btn-open')?.addEventListener('click', async () => {
   const data = await window.electronAPI.openFile();
   if (data) loadTreeData(data);
+});
+
+document.getElementById('btn-import-csv')?.addEventListener('click', async () => {
+  const data = await window.electronAPI.openCsv();
+  if (data) loadTreeData(data);
+});
+
+showFilterSelect?.addEventListener('change', () => {
+  const value = showFilterSelect.value as ShowFilter;
+  if (['all', 'tbd', 'possible_dup', 'possible_good_plus', 'possible_best'].includes(value)) {
+    showFilter = value;
+    refreshMediaGallery();
+  }
 });
 
 // Pagination controls

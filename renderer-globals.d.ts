@@ -16,12 +16,26 @@ interface FolderNode extends BaseNode {
   children: MediaNode[];
 }
 
+/** Review status for image review workflow. */
+type ReviewStatus = 'tbd' | 'reject' | 'bad' | 'dup' | 'ok' | 'good' | 'best';
+
 interface FileNode extends BaseNode {
   type: 'image' | 'video';
   size: number;
   latitude?: number;
   longitude?: number;
   dateTaken?: string;
+  status?: ReviewStatus;
+  reviewLevel?: number;
+  notes?: string;
+  fileId?: number;
+  imgWidth?: number;
+  imgLength?: number;
+  imgDateTime?: string;
+  imgMake?: string;
+  imgModel?: string;
+  imgRotate?: number;
+  imgTags?: string;
 }
 
 type MediaNode = FolderNode | FileNode;
@@ -31,6 +45,7 @@ interface Window {
     openFolder: () => Promise<FolderNode | null>;
     saveFile: (data: string) => Promise<boolean>;
     openFile: () => Promise<FolderNode | null>;
+    openCsv: () => Promise<FolderNode | null>;
     openMediaViewer: (filePath: string, type: 'image' | 'video') => Promise<void>;
   };
 }
